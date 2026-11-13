@@ -1,0 +1,7 @@
+## Interface: 16001
+## Title: NascentAddon
+## Notes: Minimal addon skeleton.
+## Author:
+## Version: 0.1.0
+
+Core.lua

@@ -1,0 +1,15 @@
+# Packager / release output
+.release/
+*.zip
+
+# Externally fetched libraries
+Libs/
+
+# Editor and OS files
+.vscode/
+.idea/
+*.swp
+*.bak
+Thumbs.db
+desktop.ini
+.DS_Store
