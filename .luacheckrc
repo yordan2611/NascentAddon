@@ -1,4 +1,4 @@
--- Luacheck configuration for NascentAddon (WoW runs Lua 5.1).
+-- Luacheck configuration for Nascent (WoW runs Lua 5.1).
 std = "lua51"
 max_line_length = false
 codes = true
@@ -18,7 +18,8 @@ ignore = {
 
 -- Globals this addon defines (SavedVariables, slash commands, named frames).
 globals = {
-    "NascentAddonDB",
+    "NascentDB",
+    "SLASH_NASCENT1",
     "SlashCmdList",
 }
 
@@ -38,12 +39,25 @@ read_globals = {
     "GameFontHighlight",
     "GameFontHighlightSmall",
 
+    -- Embedded libraries
+    "LibStub",
+
+    -- Addons, guild and group (seen unguarded in 16001-only addons)
+    "C_AddOns",
+    "IsInGuild",
+    "IsInGroup",
+    "IsInRaid",
+    "GetNumGroupMembers",
+    "LE_PARTY_CATEGORY_INSTANCE",
+    "LE_PARTY_CATEGORY_HOME", -- unverified; Comm.lua tolerates nil
+
     -- State and info
     "InCombatLockdown",
     "GetBuildInfo",
     "GetTime",
     "GetRealmName",
     "UnitName",
+    "UnitFullName", -- returns first name, surname on Forever
     "UnitClass",
     "UnitExists",
     "UnitGUID",

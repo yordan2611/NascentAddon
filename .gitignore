@@ -2,9 +2,6 @@
 .release/
 *.zip
 
-# Externally fetched libraries
-Libs/
-
 # Editor and OS files
 .vscode/
 .idea/

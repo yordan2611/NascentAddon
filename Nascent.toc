@@ -1,0 +1,15 @@
+## Interface: 16001
+## Title: Nascent
+## Notes: Nascent.
+## Author:
+## Version: 0.1.0
+## SavedVariables: NascentDB
+
+Libs\LibStub\LibStub.lua
+Libs\CallbackHandler-1.0\CallbackHandler-1.0.xml
+Libs\AceComm-3.0\AceComm-3.0.xml
+Libs\AceSerializer-3.0\AceSerializer-3.0.xml
+Libs\AceDB-3.0\AceDB-3.0.xml
+
+Core.lua
+Comm.lua
