@@ -20,7 +20,10 @@ ignore = {
 globals = {
     "NascentDB",
     "SLASH_NASCENT1",
+    "SLASH_NASCENT2",
     "SlashCmdList",
+    "Nascent_Toggle",              -- called by Bindings.xml and the addon compartment
+    "BINDING_NAME_NASCENT_TOGGLE", -- label in the key bindings menu
 }
 
 -- WoW API the addon may read. Only add a name here after confirming it exists
@@ -30,14 +33,21 @@ read_globals = {
     -- Frames and core UI
     "CreateFrame",
     "UIParent",
+    "UISpecialFrames", -- guarded in Window.lua
     "GameTooltip",
     "DEFAULT_CHAT_FRAME",
     "BackdropTemplateMixin",
+    "CreateColor", -- unguarded in NaowhForever (SetupWindow.lua), with SetGradient
     "STANDARD_TEXT_FONT",
     "GameFontNormal",
     "GameFontNormalSmall",
     "GameFontHighlight",
     "GameFontHighlightSmall",
+
+    "ColorPickerFrame",  -- SetupColorPickerAndShow is unguarded in NaowhForever
+    "GetCursorPosition", -- unguarded in NodeSight
+    "PlaySound", -- unguarded in NodeSight, with SOUNDKIT
+    "SOUNDKIT",
 
     -- Embedded libraries
     "LibStub",

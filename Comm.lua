@@ -12,7 +12,7 @@ local _, ns = ...
 --   version (string) the sender's addon version, "major.minor.patch"
 --   kind    (string) message type; only "VERSION" exists in protocol 1
 --   sid     (string) random per-session id, used to drop our own echoes
---   test    (true)   set on /nascent test messages; never sent to others
+--   test    (true)   set on /nas test messages; never sent to others
 -- `proto` and `version` are the envelope and must keep their meaning in every
 -- future protocol version, so an old copy can still learn it is out of date
 -- from a message it otherwise cannot understand.
@@ -207,7 +207,7 @@ local function ShowVerdict()
     Report(newestKnown)
 end
 
--- Asks other players and reports the result. Used by /nascent version.
+-- Asks other players and reports the result. Used by /nas version.
 function Comm:Check()
     if not mine then
         ns.Print("Version check is unavailable: the version in the TOC file is not in major.minor.patch form.")
@@ -228,11 +228,11 @@ local function PlayerFullName()
 end
 
 -- Sends a test message to ourselves through the real send and receive path,
--- pretending to be `version`. Used by /nascent test.
+-- pretending to be `version`. Used by /nas test.
 function Comm:SendTest(version)
     if not mine then return end
     if not ParseVersion(version) then
-        ns.Print("Usage: /nascent test <version>, for example /nascent test 9.9.9")
+        ns.Print("Usage: /nas test <version>, for example /nas test 9.9.9")
         return
     end
     local target = PlayerFullName()

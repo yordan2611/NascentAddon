@@ -2,6 +2,11 @@
 .release/
 *.zip
 
+# Fonts stay local until their licence allows publishing them; the addon falls
+# back to Arial Narrow without them.
+Media/Fonts/*.ttf
+Media/Fonts/*.otf
+
 # Editor and OS files
 .vscode/
 .idea/

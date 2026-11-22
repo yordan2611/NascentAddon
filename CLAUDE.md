@@ -7,7 +7,7 @@ value.
 ## Naming
 
 The addon's official name is **Nascent**. Nothing shown in game may say `NascentAddon`:
-the TOC file, `## Title`, chat output, slash command (`/nascent`), comm prefix
+the TOC file, `## Title`, chat output, slash command (`/nas`, alias `/nascent`), comm prefix
 (`Nascent`) and SavedVariables (`NascentDB`) all use `Nascent`. In code, show `ns.NAME`
 to the player, never `addonName`.
 
@@ -25,12 +25,36 @@ load the addon.
 ## Layout
 
 - `Nascent.toc` — manifest; every new Lua file must be listed here, in load order.
-- `Core.lua` — namespace (`ns.NAME`, `ns.VERSION`, `ns.Print`), AceDB setup (`ns.db`),
-  the `/nascent` slash command, and the `Nascent loaded` login message.
+- `Core.lua` — namespace (`ns.NAME`, `ns.VERSION`, `ns.COLOR`, `ns.Print`), AceDB setup
+  (`ns.db`), the `/nas` slash command, the global `Nascent_Toggle` (used by the
+  keybinding and the addon compartment entry), the combat events, and the
+  `Nascent loaded` login message.
 - `Comm.lua` — version check over addon messages (below).
+- `Window.lua` — the main window toggled by `/nas`: title bar, searchable sidebar of
+  collapsible categories (`GROUPS`), scrolling content of cards, footer. It is drawn
+  with plain colour textures (no backdrop template). Use `ns.COLOR` for the Nascent
+  blue; do not repeat the colour values. Position, size, last section and folded
+  categories are saved in `ns.db.profile.window`.
+- Page files fill one sidebar item each through its `build` function, which gets a
+  page: `page:AddCard(title)` returns a card with `AddText`, `AddControl` and
+  `AddButtons`. Build controls from `ns.Window.UI`; create window text with its `Text`
+  helper so the font size offset reaches it, and change the accent only through
+  `ns.SetAccent`.
+  - `Home.lua` — the Home page (welcome, quick actions, getting started).
+  - `Settings.lua` — the Settings page (scale, opacity, font size offset, accent
+    colour, minimap button, hide in combat).
+- `Minimap.lua` — the minimap button (LibDataBroker + LibDBIcon).
+- `Bindings.xml` — the "Toggle Nascent" keybinding. The game loads it by name; it is
+  not listed in the TOC.
+- `Media/` — `logo_n.tga`, the `icon_*.tga` textures (white on transparent, tinted in
+  code) and `Fonts/Expressway.ttf`. The font is git-ignored and exists only on disk:
+  the repo is public and the font's licence has not been checked. Without it the
+  addon falls back to Arial Narrow.
 - `Libs/` — embedded libraries, committed to the repo: LibStub, CallbackHandler-1.0,
   AceComm-3.0 (with ChatThrottleLib), AceSerializer-3.0, AceDB-3.0. Copied unmodified
-  from https://github.com/WoWUIDev/Ace3; do not edit them. Luacheck skips this folder.
+  from https://github.com/WoWUIDev/Ace3. LibDataBroker-1.1 and LibDBIcon-1.0 were
+  copied from the installed NaowhForever addon. Do not edit any of them. Luacheck
+  skips this folder.
 - `.luacheckrc` — lint config with the WoW globals whitelist.
 
 ## Comm protocol
@@ -88,8 +112,8 @@ file.
   version. Two ways to verify:
   - Search the other installed addons in
     `C:\Program Files (x86)\World of Warcraft\_forever_\Interface\AddOns`. Prefer the
-    ones whose TOC lists only interface 16001 (ForeverCore, NaowhForever, NodeSight,
-    ShortestPathForever, ForeverDungeonJournal). An unguarded call there is good
+    ones whose TOC lists only interface 16001 (NaowhForever, NodeSight,
+    ForeverDungeonJournal, ForeverQuestTint). An unguarded call there is good
     evidence; a call wrapped in `if X then` is not.
   - Ask the user to test in game and report the result, for example
     `/dump SomeFunction`, `/dump C_Some.Thing ~= nil`, or
@@ -123,5 +147,7 @@ file.
   new globals. Any intentional global (SavedVariables, slash command keys, named
   frames) must be added to `globals` in `.luacheckrc`.
 - Print to chat with `ns.Print`, which adds the coloured `Nascent:` tag.
+- UI work follows `docs/UI-SPEC.md`. It's the source of truth for colors, sizes, fonts
+  and behavior. Update it if a design decision changes.
 - Report honestly: luacheck passing does not mean the addon works in game. Say what was
   linted and what still needs an in-game test.

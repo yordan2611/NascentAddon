@@ -1,0 +1,5 @@
+<Bindings>
+    <Binding name="NASCENT_TOGGLE" category="Nascent">
+        Nascent_Toggle()
+    </Binding>
+</Bindings>

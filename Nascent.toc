@@ -2,14 +2,22 @@
 ## Title: Nascent
 ## Notes: Nascent.
 ## Author:
-## Version: 0.1.0
+## Version: 0.2.0
 ## SavedVariables: NascentDB
+## IconTexture: Interface\AddOns\Nascent\Media\logo_n.tga
+## AddonCompartmentFunc: Nascent_Toggle
 
 Libs\LibStub\LibStub.lua
 Libs\CallbackHandler-1.0\CallbackHandler-1.0.xml
+Libs\LibDataBroker-1.1\LibDataBroker-1.1.lua
+Libs\LibDBIcon-1.0\lib.xml
 Libs\AceComm-3.0\AceComm-3.0.xml
 Libs\AceSerializer-3.0\AceSerializer-3.0.xml
 Libs\AceDB-3.0\AceDB-3.0.xml
 
 Core.lua
 Comm.lua
+Window.lua
+Settings.lua
+Home.lua
+Minimap.lua
