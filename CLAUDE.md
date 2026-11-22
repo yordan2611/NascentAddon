@@ -57,6 +57,32 @@ load the addon.
   skips this folder.
 - `.luacheckrc` — lint config with the WoW globals whitelist.
 
+## Status
+
+Current version 0.2.0 (`main`, commit a7feaef, 2026-11-22). Update this section when
+something is tested in game or an open item is done; remove items once they are no
+longer true.
+
+Tested in game:
+- The window opens and draws the full layout: title bar, sidebar with search and
+  categories, Home page cards, footer (user screenshot, 2026-11-22).
+
+Not yet tested in game:
+- Settings page: UI scale, opacity and font size sliders, accent colour picker and Reset,
+  the two checkboxes.
+- Search filtering, Enter to open the first match, folding categories.
+- Scroll bars, resize grip, saved position, size and section after `/reload`.
+- Minimap button, "Toggle Nascent" keybinding, addon compartment entry, hide in combat.
+- Home page buttons (Check for updates, Reload UI).
+
+Open:
+- Categories and sections in `GROUPS` (`Window.lua`) are placeholders except
+  General → Home and Settings; the real sections are not decided yet.
+- Not taken from the reference screenshot: extra title-bar icons (only close exists)
+  and a CPU/memory readout in the footer.
+- Expressway font licence unchecked, so the font is git-ignored.
+- BugGrabber has not been read since the user's last reload; read it after the next one.
+
 ## Comm protocol
 
 `Comm.lua` sends an AceSerializer-encoded table with AceComm under the prefix `Nascent`:
