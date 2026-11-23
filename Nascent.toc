@@ -2,7 +2,7 @@
 ## Title: Nascent
 ## Notes: Nascent.
 ## Author:
-## Version: 0.2.0
+## Version: 0.3.0
 ## SavedVariables: NascentDB
 ## IconTexture: Interface\AddOns\Nascent\Media\logo_n.tga
 ## AddonCompartmentFunc: Nascent_Toggle
@@ -18,6 +18,10 @@ Libs\AceDB-3.0\AceDB-3.0.xml
 Core.lua
 Comm.lua
 Window.lua
+Controls.lua
 Settings.lua
 Home.lua
+Cheapest.lua
+CheapestUI.lua
+CheapestPage.lua
 Minimap.lua

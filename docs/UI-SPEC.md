@@ -172,3 +172,74 @@ As built:
 - `Media/Fonts/Expressway.ttf`.
 - Present: `logo_n.tga`, `icon_close.tga`, `icon_grip.tga`, `icon_chevron_down.tga`, `icon_chevron_right.tga`, `Fonts/Expressway.ttf`.
   The font is git-ignored (local only) until its licence is checked; copies built from the public repo use the fallback font.
+
+## 8. Cheapest items (category Inventory)
+
+Shows the least valuable stacks in the general bags (bags with a family, such as herb or soul
+bags, are skipped) so the player can make room. Own implementation of the idea behind
+DeleteCheapestItem Reloaded; no code from it.
+
+What is listed:
+- Qualities picked on the page (default Poor, Common, Uncommon), optionally no soulbound items.
+- Never: ignored items, locked slots, items without a sell price, quest items, keys, ammunition,
+  quivers, fishing poles, profession tools (mining pick, skinning knife, enchanting rods, ...).
+- Value = unit price × stack count. Unit price = vendor price, or Auctionator's price when
+  "Use auction prices" is on and Auctionator knows the item. Sorted cheapest first.
+
+List row (shared by the pop-up and the page): height 36, 1px divider between rows, hover.bg on
+hover with the item's bag tooltip (GameTooltip) plus two muted hint lines (Shift-click to link,
+right-click to ignore, Shift-click Delete). Icon 26 at inset 6; name in the item's quality colour
+with "x<count>" muted; under it, 12 muted: "Vendor <coins>", "(<coins> each)" for stacks, and
+"Auction <coins>" when known. Buttons 58 × 22 on the right, 6 apart, from the right: Ignore,
+Delete, and Sell while a vendor is open (leftmost, label in the accent: the main action there).
+With "Confirm before deleting" on, the first Delete click turns the label into "Confirm"
+(close.hover) with a 2px close.hover bar along its bottom that empties over the 4 s; a second
+click within 4 s deletes. Shift-click on Delete deletes without confirming.
+Clicks on the row: the chat-link modifier (Shift by default) or Ctrl inserts the item link in
+chat (ChatFrameUtil.InsertLink); right-click ignores the item.
+While loot is waiting, a row worth more than the most wanted waiting item gets a 12 close.hover
+tag "Worth more than the loot" at the right of the name line (not when that item is a quest item
+or has no price yet).
+Nothing listed → a body-text line saying why: how many sellable stacks were left out for an
+unticked quality, the ignore list or Skip soulbound, or that nothing can be sold. In the pop-up a
+"Change what is listed" text button under it opens this page.
+
+Pop-up `NascentCheapestFrame`: 480 wide, height from its contents; strata HIGH, toplevel,
+clamped, movable by the title bar, Esc closes, follows the UI scale and window opacity. Title bar
+like the main window's (logo, "Cheapest items", close X) with "<n> free" (12) left of the close X,
+muted, close.hover at 0. Body bg.window, padding 8. While the loot window holds items: a 30-high
+line on bg.sidebar with a divider edge, "Waiting to loot" (12 muted), the most wanted item's
+icon 20, name in its quality colour, "x<n>" muted and its value (or "quest item"), and
+"+<n> more" right; hover shows the loot tooltip. 8 below it, up to "Rows in the pop-up" rows
+(3–10, default 5). Footer: "<n> stacks listed, worth <coins>" left; "Options" text button right
+(opens this page), and left of it, while a vendor is open, "Sell all Poor (<n>)".
+
+Position: saved as its top-left corner when dragged. When it opens by itself while looting and
+"Place it beside the loot window" is on (default), it goes beside the loot window
+(PlumberLootWindow or LootFrame, 12 apart, on the right unless that runs off screen); dragging it
+then turns the option off and keeps the new spot. Otherwise it opens at the saved spot.
+
+Opens when: the game reports the inventory is full (ERR_INV_FULL / ERR_BAG_FULL) and "Open when
+your bags are full" is on (default); a loot window opens with at most "this many free slots"
+(0 = off, default); `/nas cheap`; "Open pop-up" on the page. A pop-up that opened by itself (the
+first two) closes with the loot window. The loot window is tracked by LootFrame's OnShow/OnHide as
+well as LOOT_READY / LOOT_OPENED / LOOT_CLOSED, as LOOT_OPENED does not always fire on Forever.
+
+Actions: none in combat, none while the cursor holds something, and each re-checks that the slot
+still holds the listed stack. Delete picks the stack up and calls DeleteCursorItem; for items the
+game asks about, the game's own dialog decides. Sell uses the vendor. Ignore adds the item to a
+per-character list. After a delete during looting, "Keep looting after deleting" (default on)
+loots at once everything that fits (the freed slot and any other free slots, plus room on existing
+stacks; quest items first, then highest vendor value), as the server handles the delete before the
+loot requests. When the game's own delete dialog is shown, it loots on the first bag update that
+shows a free slot instead. `/nas debug` prints a trace of the loot state and these steps.
+Sell all Poor sells every Poor stack with a sell price that is not ignored, one every 0.15 s,
+and stops if the vendor closes or combat starts. The "Delete cheapest item" keybinding
+(Bindings.xml, category Nascent) is Delete on the first listed stack, with the same confirmation.
+
+Page cards: "In your bags" (up to 10 rows, Open pop-up / Refresh / Sell all Poor, a muted hint
+about the clicks and the keybinding), "What is listed" (quality grid
+of checkboxes 3 per row with names in quality colours, Skip soulbound items), "Pop-up" (also
+Place it beside the loot window),
+"Deleting" (Confirm before deleting, Keep looting after deleting, Use auction prices),
+"Ignored items" (rows 28 high: icon 18, name, Remove; Clear all).

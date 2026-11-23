@@ -137,6 +137,10 @@ local GROUPS = {
         { key = "settings", label = "Settings", desc = "Options for this addon.",
           build = function(page) ns.Settings:Build(page) end },
     } },
+    { key = "inventory", label = "Inventory", items = {
+        { key = "cheapest", label = "Cheapest items", desc = "Make room when your bags are full.",
+          build = function(page) ns.CheapestPage:Build(page) end },
+    } },
     { key = "categoryTwo", label = "Category Two", items = {
         { key = "one", label = "Section One", desc = "Placeholder description." },
         { key = "two", label = "Section Two", desc = "Placeholder description." },
@@ -161,6 +165,7 @@ local pages = {}            -- item key -> page
 local fontStrings = {}      -- { text = FontString or EditBox, size = base size }, for the font size offset
 local backgrounds = {}      -- { texture = Texture, colour = {r, g, b} }, for the window opacity
 local accentListeners = {}  -- functions that repaint something in the accent colour
+local layoutListeners = {}  -- functions that re-lay out other windows after a font or scale change
 local selectedKey = DEFAULT_KEY
 local filter = ""           -- lower-case search text
 -- True while the window should come back when combat ends (hide in combat).
@@ -263,6 +268,7 @@ local function CreateButton(parent, label, onClick)
     local text = Text(button, FONT_BODY, C.textPrimary)
     text:SetPoint("CENTER")
     text:SetText(label)
+    button.label = text
 
     button:SetScript("OnEnter", function() hover:Show() end)
     button:SetScript("OnLeave", function() hover:Hide() end)
@@ -474,6 +480,14 @@ function Card:AddButtons(list)
     return holder
 end
 
+-- A region that sizes itself: `region.Layout(width)` places its contents for
+-- the card's inner width and returns its height. Call Window:Relayout() after
+-- its contents change.
+function Card:AddCustom(region)
+    self.items[#self.items + 1] = { kind = "custom", region = region }
+    return region
+end
+
 -- Places the items for a card `width` wide and returns the card's height.
 function Card:Layout(width)
     local inner = width - 2 * CARD_PAD
@@ -507,6 +521,13 @@ function Card:Layout(width)
                 button:SetWidth(buttonWidth)
             end
             y = y + BUTTON_HEIGHT
+        elseif item.kind == "custom" then
+            region:ClearAllPoints()
+            region:SetPoint("TOPLEFT", CARD_PAD, -y)
+            region:SetWidth(inner)
+            local height = region.Layout(inner)
+            region:SetHeight(math.max(1, height))
+            y = y + height
         end
     end
     y = y + CARD_PAD
@@ -882,6 +903,7 @@ local function CreateCloseButton(parent, window)
     -- OnLeave does not fire when the button is hidden under the cursor.
     button:SetScript("OnHide", function() SetHovered(false) end)
     button:SetScript("OnClick", function() window:Hide() end)
+    return button
 end
 
 local function CreateTitleBar(window)
@@ -1063,14 +1085,40 @@ end
 Window.UI = {
     C = C,
     Solid = Solid,
+    Background = Background,
     Text = Text,
     AddEdge = AddEdge,
+    AddLine = AddLine,
+    Button = CreateButton,
+    CloseButton = CreateCloseButton,
     Clamp = Clamp,
+    Accent = Accent,
     OnAccent = OnAccent,
+    -- Runs `relayout` after the font size offset or the UI scale changes.
+    OnRelayout = function(relayout)
+        layoutListeners[#layoutListeners + 1] = relayout
+    end,
+    LOGO = LOGO,
+    BORDER = BORDER,
+    TITLE_HEIGHT = TITLE_HEIGHT,
+    TITLE_INSET = TITLE_INSET,
+    TITLE_LOGO_SIZE = TITLE_LOGO_SIZE,
+    TITLE_NAME_GAP = TITLE_NAME_GAP,
+    FOOTER_HEIGHT = FOOTER_HEIGHT,
+    FOOTER_INSET = FOOTER_INSET,
+    BUTTON_GAP = BUTTON_GAP,
+    FONT_TITLE = FONT_TITLE,
     FONT_BODY = FONT_BODY,
+    FONT_FOOTER = FONT_FOOTER,
     SCALE_MIN = SCALE_MIN,
     SCALE_MAX = SCALE_MAX,
 }
+
+local function NotifyRelayout()
+    for _, relayout in ipairs(layoutListeners) do
+        relayout()
+    end
+end
 
 -- The Apply functions push a changed setting from ns.db.profile (or ns.COLOR)
 -- into the window. They do nothing before the window has been built.
@@ -1079,6 +1127,7 @@ function Window:ApplyScale()
     if frame then
         frame:SetScale(Clamp(ns.db.profile.scale, SCALE_MIN, SCALE_MAX))
     end
+    NotifyRelayout()
 end
 
 function Window:ApplyOpacity()
@@ -1094,6 +1143,14 @@ function Window:ApplyFonts()
     end
     if frame then
         Relayout()
+    end
+    NotifyRelayout()
+end
+
+-- Re-lays out the selected page, for pages whose content changed size.
+function Window:Relayout()
+    if frame and frame:IsShown() then
+        LayoutPage()
     end
 end
 
@@ -1134,6 +1191,17 @@ function Window:Toggle()
         end
     else
         frame:Show()
+    end
+end
+
+-- Opens the window on the section with item key `key`.
+function Window:ShowSection(key)
+    EnsureFrame()
+    if pages[key] then
+        Select(key)
+    end
+    if not frame:IsShown() then
+        Window:Toggle()
     end
 end
 

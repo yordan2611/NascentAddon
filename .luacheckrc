@@ -24,6 +24,8 @@ globals = {
     "SlashCmdList",
     "Nascent_Toggle",              -- called by Bindings.xml and the addon compartment
     "BINDING_NAME_NASCENT_TOGGLE", -- label in the key bindings menu
+    "Nascent_DeleteCheapest",      -- called by Bindings.xml
+    "BINDING_NAME_NASCENT_DELETE_CHEAPEST",
 }
 
 -- WoW API the addon may read. Only add a name here after confirming it exists
@@ -48,6 +50,36 @@ read_globals = {
     "GetCursorPosition", -- unguarded in NodeSight
     "PlaySound", -- unguarded in NodeSight, with SOUNDKIT
     "SOUNDKIT",
+
+    -- Bags, items, cursor, loot (all unguarded in NaowhForever_QoL/Loot,
+    -- whose DestroyCheapest files do the same job on 16001)
+    "C_Container",
+    "C_Item",
+    "C_CurrencyInfo",        -- GetCoinTextureString
+    "BACKPACK_CONTAINER",
+    "NUM_BAG_SLOTS",
+    "NUM_TOTAL_EQUIPPED_BAG_SLOTS", -- used as `NUM_TOTAL_EQUIPPED_BAG_SLOTS or NUM_BAG_SLOTS`
+    "ITEM_QUALITY_COLORS",
+    "GetCursorInfo",
+    "ClearCursor",
+    "DeleteCursorItem",
+    "StaticPopup_FindVisible",
+    "GetNumLootItems",
+    "LootSlotHasItem",
+    "GetLootSlotType",
+    "GetLootSlotInfo",
+    "GetLootSlotLink",
+    "LootSlot",
+    "LootFrame",             -- IsShown and HookScript unguarded in DestroyCheapest*.lua
+    "IsShiftKeyDown",        -- unguarded in NaowhForever_QoL (LootFeed.lua, GlobalCopy.lua)
+    "IsControlKeyDown",      -- unguarded in NaowhForever_QoL (BagSpace.lua)
+    "IsModifiedClick",       -- IsModifiedClick("CHATLINK") unguarded in BagSpace.lua
+    "ChatFrameUtil",         -- ChatFrameUtil.InsertLink unguarded in BagSpace.lua
+    "ERR_INV_FULL",
+    "ERR_BAG_FULL",
+
+    -- Optional addons (always checked for nil before use)
+    "Auctionator",
 
     -- Embedded libraries
     "LibStub",

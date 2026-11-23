@@ -35,16 +35,27 @@ load the addon.
   with plain colour textures (no backdrop template). Use `ns.COLOR` for the Nascent
   blue; do not repeat the colour values. Position, size, last section and folded
   categories are saved in `ns.db.profile.window`.
+- `Controls.lua` — the slider, checkbox and text button, added to `ns.Window.UI`
+  (`UI.Slider`, `UI.Checkbox`, `UI.TextButton`). Loads after `Window.lua`, before the
+  page files.
 - Page files fill one sidebar item each through its `build` function, which gets a
-  page: `page:AddCard(title)` returns a card with `AddText`, `AddControl` and
-  `AddButtons`. Build controls from `ns.Window.UI`; create window text with its `Text`
-  helper so the font size offset reaches it, and change the accent only through
-  `ns.SetAccent`.
+  page: `page:AddCard(title)` returns a card with `AddText`, `AddControl`,
+  `AddButtons` and `AddCustom` (a region with `region.Layout(width)` returning its
+  height; call `ns.Window:Relayout()` when its content changes). Build controls from
+  `ns.Window.UI`; create window text with its `Text` helper so the font size offset
+  reaches it, and change the accent only through `ns.SetAccent`.
   - `Home.lua` — the Home page (welcome, quick actions, getting started).
   - `Settings.lua` — the Settings page (scale, opacity, font size offset, accent
     colour, minimap button, hide in combat).
+  - `CheapestPage.lua` — the Cheapest items page (category Inventory).
+- Cheapest items (docs/UI-SPEC.md section 8): `Cheapest.lua` scans the bags, sorts
+  stacks by value, deletes, sells, ignores and handles the events; `CheapestUI.lua`
+  draws the item list and the pop-up `NascentCheapestFrame` (`/nas cheap`). Settings
+  in `ns.db.profile.cheapest`, the ignore list per character in
+  `ns.db.char.cheapestIgnored`. Same idea as the DeleteCheapestItem Reloaded addon,
+  which is All Rights Reserved: never copy its code.
 - `Minimap.lua` — the minimap button (LibDataBroker + LibDBIcon).
-- `Bindings.xml` — the "Toggle Nascent" keybinding. The game loads it by name; it is
+- `Bindings.xml` — the "Toggle Nascent" and "Delete cheapest item" keybindings. The game loads it by name; it is
   not listed in the TOC.
 - `Media/` — `logo_n.tga`, the `icon_*.tga` textures (white on transparent, tinted in
   code) and `Fonts/Expressway.ttf`. The font is git-ignored and exists only on disk:
@@ -59,13 +70,23 @@ load the addon.
 
 ## Status
 
-Current version 0.2.0 (`main`, commit a7feaef, 2026-11-22). Update this section when
+Current version 0.3.0 (`main`, committed and pushed, 2026-11-23). Update this section when
 something is tested in game or an open item is done; remove items once they are no
 longer true.
 
 Tested in game:
 - The window opens and draws the full layout: title bar, sidebar with search and
   categories, Home page cards, footer (user screenshot, 2026-11-22).
+- Cheapest items: the pop-up opens on full bags, Delete works, and looting continues
+  after a delete (user, 2026-11-23, after the second loot fix). BugGrabber showed no
+  Nascent errors.
+- Cheapest items usability pass: the user reported it "works as intended so far"
+  (2026-11-23), without naming each part. Parts not confirmed one by one: the "Waiting
+  to loot" line and "Worth more than the loot" tag, placing the pop-up beside the loot
+  window (PlumberLootWindow or LootFrame) and dragging turning that off, Shift-click
+  Delete, row right-click to ignore and Shift/Ctrl-click to link, the "Delete cheapest
+  item" keybinding, the Confirm countdown bar, the empty-list reasons, Sell first at a
+  vendor and Sell all Poor, the free count in the title, the footer total, "(each)".
 
 Not yet tested in game:
 - Settings page: UI scale, opacity and font size sliders, accent colour picker and Reset,
@@ -74,14 +95,22 @@ Not yet tested in game:
 - Scroll bars, resize grip, saved position, size and section after `/reload`.
 - Minimap button, "Toggle Nascent" keybinding, addon compartment entry, hide in combat.
 - Home page buttons (Check for updates, Reload UI).
+- Cheapest items (0.3.0): the pop-up closing with the loot window (not confirmed
+  separately), the list filters, Delete without confirmation, the game's own delete
+  dialog for better items, Sell, Ignore and the ignore list, the free-slot threshold,
+  Auctionator prices.
 
 Open:
 - Categories and sections in `GROUPS` (`Window.lua`) are placeholders except
-  General → Home and Settings; the real sections are not decided yet.
+  General → Home and Settings and Inventory → Cheapest items; the rest are not decided
+  yet.
+- Cheapest items does not open the pop-up when the bags are opened (the reference
+  addon has that option, off by default).
 - Not taken from the reference screenshot: extra title-bar icons (only close exists)
   and a CPU/memory readout in the footer.
 - Expressway font licence unchecked, so the font is git-ignored.
-- BugGrabber has not been read since the user's last reload; read it after the next one.
+- BugGrabber was last read on 2026-11-23 after a reload (no Nascent errors); read it
+  again after the next one.
 
 ## Comm protocol
 
@@ -164,6 +193,15 @@ file.
   `BackdropTemplateMixin and "BackdropTemplate" or nil`, and when combining templates
   use a comma-separated string. Confirm with `/dump BackdropTemplateMixin ~= nil` before
   relying on either behaviour.
+- **LOOT_OPENED does not always fire.** On Forever a loot window can show without it
+  (NaowhForever notes this too). Track the loot window with `LootFrame:HookScript`
+  OnShow/OnHide and LOOT_READY as well, never with LOOT_OPENED alone. Replacement loot
+  windows (Plumber, EllesmereUI) keep the Blizzard frame hidden, so also count
+  `GetNumLootItems() > 0`. Compare `GetLootSlotType` with the number `1` (item), as
+  Plumber and DeleteCheapestItem do; `LOOT_SLOT_ITEM` is not verified on this client.
+- **`/nas debug`** turns on `ns.debug` until `/reload`; trace with a local `Trace` that
+  prints only when it is on. Ask the user for that output when behaviour in game is
+  unclear.
 - **No `VCENTER`.** It is not a valid value for `SetJustifyV`. Vertical justification
   is `"TOP"`, `"MIDDLE"`, or `"BOTTOM"`; horizontal is `"LEFT"`, `"CENTER"`, `"RIGHT"`.
 

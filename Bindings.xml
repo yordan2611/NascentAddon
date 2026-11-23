@@ -2,4 +2,7 @@
     <Binding name="NASCENT_TOGGLE" category="Nascent">
         Nascent_Toggle()
     </Binding>
+    <Binding name="NASCENT_DELETE_CHEAPEST" category="Nascent">
+        Nascent_DeleteCheapest()
+    </Binding>
 </Bindings>

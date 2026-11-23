@@ -53,6 +53,23 @@ local dbDefaults = {
         opacity = 1,     -- window background alpha, 0.6 to 1
         fontOffset = 0,  -- added to every font size, -2 to +4
         -- accent = { r, g, b } is written by ns.SetAccent; absent means the default.
+        -- Cheapest items (Cheapest.lua, CheapestPage.lua).
+        cheapest = {
+            qualities = { [0] = true, [1] = true, [2] = true, [3] = false, [4] = false },
+            skipSoulbound = false,
+            openWhenFull = true,
+            openAtFree = 0,          -- open while looting at this many free slots or fewer; 0 = off
+            rows = 5,                -- rows in the pop-up, 3 to 10
+            confirmDelete = true,
+            lootAfterDelete = true,
+            auctionPrices = false,
+            followLoot = true,       -- place a pop-up opened while looting beside the loot window
+            -- CheapestUI.lua writes the pop-up's point, relativePoint, x, y here.
+            window = {},
+        },
+    },
+    char = {
+        cheapestIgnored = {},        -- [itemID] = true, never listed on this character
     },
 }
 
@@ -64,13 +81,23 @@ end
 
 BINDING_NAME_NASCENT_TOGGLE = "Toggle " .. ns.NAME
 
+-- The "Delete cheapest item" keybinding (Bindings.xml). With "Confirm before
+-- deleting" on, the first press arms and the second deletes.
+function Nascent_DeleteCheapest()
+    ns.Cheapest:DeleteCheapest()
+end
+
+BINDING_NAME_NASCENT_DELETE_CHEAPEST = "Delete cheapest item"
+
 local function PrintHelp()
     ns.Print("version " .. ns.VERSION)
     ns.Print("/nas - open or close the window")
+    ns.Print("/nas cheap - open or close the cheapest items pop-up")
     ns.Print("/nas minimap - show or hide the minimap button")
     ns.Print("/nas combat - turn hiding the window in combat on or off")
     ns.Print("/nas version - ask other players whether a newer version exists")
     ns.Print("/nas test <version> - send yourself a test message, e.g. /nas test 9.9.9")
+    ns.Print("/nas debug - print a trace of what Nascent does, until /reload")
 end
 
 SLASH_NASCENT1 = "/nas"
@@ -80,6 +107,8 @@ SlashCmdList.NASCENT = function(input)
     command = command:lower()
     if command == "" then
         ns.Window:Toggle()
+    elseif command == "cheap" then
+        ns.CheapestWindow:Toggle()
     elseif command == "minimap" then
         local hidden = not ns.db.profile.minimap.hide
         ns.MinimapButton:SetHidden(hidden)
@@ -90,6 +119,9 @@ SlashCmdList.NASCENT = function(input)
         ns.db.profile.hideInCombat = enabled
         ns.Settings:Refresh()
         ns.Print(enabled and "The window now hides in combat." or "The window now stays open in combat.")
+    elseif command == "debug" then
+        ns.debug = not ns.debug
+        ns.Print(ns.debug and "Debug trace on (until /reload)." or "Debug trace off.")
     elseif command == "version" then
         ns.Comm:Check()
     elseif command == "test" then
@@ -115,6 +147,7 @@ frame:SetScript("OnEvent", function(self, event, arg1)
         self:UnregisterEvent("PLAYER_LOGIN")
         print("Nascent loaded")
         ns.Comm:Enable()
+        ns.Cheapest:Enable()
         ns.Window:RegisterMedia()
         ns.MinimapButton:Enable()
         self:RegisterEvent("PLAYER_REGEN_DISABLED")
